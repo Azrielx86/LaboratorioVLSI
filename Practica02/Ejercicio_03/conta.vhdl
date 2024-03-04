@@ -46,9 +46,9 @@ begin
       when e4     => next_state <= e5;
       when e5     => next_state <= e6;
       when e6     => next_state <= e7;
-		when e7     => next_state <= e8;
-		when e8     => next_state <= e9;
-		when e9     => next_state <= ea;
+      when e7     => next_state <= e8;
+      when e8     => next_state <= e9;
+      when e9     => next_state <= ea;
       when ea     => next_state <= e0;
       when others =>
         next_state <= e0;
