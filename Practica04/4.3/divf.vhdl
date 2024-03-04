@@ -10,16 +10,16 @@ entity divf is
 end entity;
 
 architecture arqdivf of divf is
-  signal contador : integer range 0 to num;
+  signal conteo : integer range 0 to num;
 begin
   process (clk)
   begin
     if (rising_edge(clk)) then
-      if (contador = num) then
-        contador <= 0;
-        clkl     <= not clkl;
+      if (conteo = num) then
+        conteo <= 0;
+        clkl   <= not clkl;
       else
-        contador <= contador + 1;
+        conteo <= conteo + 1;
       end if;
     end if;
   end process;
