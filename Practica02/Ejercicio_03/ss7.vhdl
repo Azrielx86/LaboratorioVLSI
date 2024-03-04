@@ -11,15 +11,17 @@ end entity;
 architecture arqss7 of ss7 is
 begin
   with bcd select
-    hex <= "1000000" when "0000",
-    "0001001" when "0001",
-    "1000000" when "0010",
-    "1000111" when "0011",
-    "0001000" when "0100",
-    "0001100" when "0101",
-    "0101111" when "0110",
-    "1000000" when "0111",
-    "0001110" when "1000",
-    "1010000" when "1001",
-    "1000000" when others;
+    hex <=
+    "0001001" when "0000", -- H
+    "1000000" when "0001", -- O
+    "1000111" when "0010", -- L
+    "0001000" when "0011", -- A
+    "1111111" when "0100", -- Espacio
+    "0001100" when "0101", -- P
+    "0101111" when "0110", -- r
+    "1000000" when "0111", -- O
+    "0001110" when "1000", -- F
+    "0000110" when "1001", -- E
+	 "1111111" when "1010", -- Espacio
+    "1111111" when others;
 end architecture;

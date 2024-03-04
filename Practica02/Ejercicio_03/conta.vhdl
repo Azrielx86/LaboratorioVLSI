@@ -5,22 +5,25 @@ entity conta is
   port (
     clk      : in std_logic;
     reset    : in std_logic;
-    SalMoore : out std_logic_vector(2 downto 0)
+    SalMoore : out std_logic_vector(3 downto 0)
   );
 end entity conta;
 
 architecture arqconta of conta is
-  subtype state is std_logic_vector(2 downto 0);
-  signal present_state, next_state : std_logic_vector(2 downto 0);
+  subtype state is std_logic_vector(3 downto 0);
+  signal present_state, next_state : std_logic_vector(3 downto 0);
   -- Estados
-  constant e0 : state := "000";
-  constant e1 : state := "001";
-  constant e2 : state := "010";
-  constant e3 : state := "011";
-  constant e4 : state := "100";
-  constant e5 : state := "101";
-  constant e6 : state := "110";
-  constant e7 : state := "111";
+  constant e0 : state := "0000";
+  constant e1 : state := "0001";
+  constant e2 : state := "0010";
+  constant e3 : state := "0011";
+  constant e4 : state := "0100";
+  constant e5 : state := "0101";
+  constant e6 : state := "0110";
+  constant e7 : state := "0111";
+  constant e8 : state := "1000";
+  constant e9 : state := "1001";
+  constant ea : state := "1010";
 begin
   process (clk)
   begin
@@ -43,7 +46,10 @@ begin
       when e4     => next_state <= e5;
       when e5     => next_state <= e6;
       when e6     => next_state <= e7;
-      when e7     => next_state <= e0;
+		when e7     => next_state <= e8;
+		when e8     => next_state <= e9;
+		when e9     => next_state <= ea;
+      when ea     => next_state <= e0;
       when others =>
         next_state <= e0;
     end case;
