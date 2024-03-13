@@ -12,7 +12,7 @@ architecture arqpwm of pwm is
   signal led0, led1, led2, led3, led4, led5, led6, led7, led8 : integer;
 
 begin
-
+  -- Divisor de frecuencias para ffd y flip flops d para cada uno de los leds
   dvfff : entity work.divf(arqdivf) generic map (25000000) port map(clk, clkl);
   ld0   : entity work.data(arqdata) port map(clkl, reset, led0);
   ld1 : entity work.ffd(archffd) port map(clkl, led1, led0);
@@ -24,7 +24,8 @@ begin
   ld7 : entity work.ffd(archffd) port map(clkl, led7, led6);
   ld8 : entity work.ffd(archffd) port map(clkl, led8, led7);
 
-
+  -- Divisor de frecuencias para el pwm y los pwm de cada led, estos tomarán
+  -- la entrada del anterior cada que los flip flop d transfieran el dato almacenado.
   dvfl : entity work.divf(arqdivf) generic map(250) port map(clk, clk_led);
   l0   : entity work.senal (arqsenal) port map(clk_led, led0, led(0));
   l1   : entity work.senal (arqsenal) port map(clk_led, led1, led(1));
