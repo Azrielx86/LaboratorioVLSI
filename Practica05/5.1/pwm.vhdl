@@ -14,8 +14,8 @@ architecture arqpwm of pwm is
   signal clkl : std_logic;
   signal pwm_out : std_logic;
 begin
-  epwm : entity work.senal (arqsenal) port map(clkl, 250, pwm_out);
-  dvfff    : entity work.divf(arqdivf) generic map (25000000) port map(clk, clkl);
+  epwm : entity work.senal (arqsenal) port map(clkl, 2500, pwm_out);
+  dvfff    : entity work.divf(arqdivf) port map(clk, clkl);
 
   process (rst, clkl)
   begin
@@ -51,7 +51,7 @@ begin
           NS <= LEFT;
         end if;
 
-        pwm  <= not pwm_out;
+        pwm  <= '0';
         npwm <= pwm_out;
         enable_out <= '1';
 
@@ -65,7 +65,7 @@ begin
         end if;
 
         pwm  <= pwm_out;
-        npwm <= not pwm_out;
+        npwm <= '0';
         enable_out <= '1';
 
       when others =>
