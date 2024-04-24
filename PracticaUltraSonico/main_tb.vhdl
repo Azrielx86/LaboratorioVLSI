@@ -36,11 +36,11 @@ begin
   -- Clock process
   process
   begin
-    while now < 100000 ns loop
+    while now < 100 ms loop
       clk <= '0';
-      wait for 10 ns;
+      wait for 20 ns;
       clk <= '1';
-      wait for 10 ns;
+      wait for 20 ns;
     end loop;
     wait;
   end process;
@@ -48,21 +48,17 @@ begin
   -- Stimulus process
   process
   begin
-    -- Test case 1
     echo <= '0';
-    wait for 7000 ns;
-    -- assert trigger = '0' report "Test case 1 failed" severity error;
-    -- assert led_out = "00000000" report "Test case 1 failed" severity error;
-
-    -- Test case 2
+    wait for 1 ms;
     echo <= '1';
-    wait for 9000 ns;
-    -- assert trigger = '1' report "Test case 2 failed" severity error;
-    -- assert led_out = "00000000" report "Test case 2 failed" severity error;
+    wait for 2 ms;
 
-    -- Add more test cases here
     echo <= '0';
-    wait for 100 ns;
+    wait for 20 ms;
+    echo <= '1';
+    wait for 2 ms;
+
+    echo <= '0';
 
     wait;
   end process;

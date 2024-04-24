@@ -5,11 +5,11 @@ use ieee.numeric_std.all;
 -- https://stackoverflow.com/questions/32599947/cant-run-hc-sr04-sensor-vhdl
 entity ultrasonic is
   port (
-    clk       : in std_logic;
-    reset     : in std_logic;
-    echo      : in std_logic;
-    trigger   : out std_logic;
-    echo_time : out integer
+    clk      : in std_logic;
+    reset    : in std_logic;
+    echo     : in std_logic;
+    trigger  : out std_logic;
+    distance : out integer
   );
 end entity ultrasonic;
 
@@ -43,7 +43,7 @@ begin
             rst_timer <= '0';
           end if;
         when Echo_state =>
-          if echo_recieved = '1' then
+          if echo_recieved = '1' or cnt_timer >= d then
             state     <= Init_state;
             rst_timer <= '1';
           else
@@ -75,16 +75,17 @@ begin
       when Init_state =>
         en_timer      <= '1';
         trigger       <= '0';
-        d             <= 48;
+        d             <= 10;
         echoing       <= '0';
         echo_recieved <= '0';
       when Trigger_state =>
         en_timer      <= '1';
-        d             <= 240;
+        d             <= 500;
         echoing       <= '0';
         echo_recieved <= '0';
         trigger       <= '1';
       when Echo_state =>
+        d <= 1_900_000;
         if echo = '0' and echoing = '0' then
           en_timer <= '1';
         elsif echo = '1' then
@@ -101,5 +102,6 @@ begin
     end case;
   end process;
 
-  echo_time <= final_timer;
+  -- VelSonido[cm]( Conteo[hz] * 1000[ms] / 50_000_000[hz]) / 2 -> distancia en cm
+  distance <= (34 * (final_timer * 1_000 / 25_000_000)) / 2;
 end architecture;

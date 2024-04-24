@@ -26,7 +26,7 @@ architecture arqmain of main is
       reset     : in std_logic;
       echo      : in std_logic;
       trigger   : out std_logic;
-      echo_time : out integer
+      distance  : out integer
     );
   end component ultrasonic;
 begin
