@@ -9,108 +9,83 @@ entity ultrasonic is
     reset    : in std_logic;
     echo     : in std_logic;
     trigger  : out std_logic;
-    distance : out integer
+    distance : out integer := 0
   );
 end entity ultrasonic;
 
 architecture archultrasonic of ultrasonic is
-  type state_type is (Init_state, Trigger_state, Echo_state);
-  signal state         : state_type := Init_state;
-  signal echoing       : std_logic  := '0';
-  signal echo_recieved : std_logic  := '0';
-  signal d             : integer;
-  signal en_timer      : std_logic := '0';
-  signal rst_timer     : std_logic := '0';
-  signal cnt_timer     : integer   := 0;
-  signal final_timer   : integer   := 0;
+  type state_type is (Wait_state, Echo_state);
+  signal NS, PS : state_type := Wait_state;
+  signal cuenta : integer    := 0;
+  -- signal reset_cuenta         : std_logic  := '0';
+  signal centimeters          : integer   := 0;
+  signal distance_out         : integer   := 0;
+  signal past_echo, sync_echo : std_logic := '0';
 begin
-  state_machine : process (clk, cnt_timer, echo_recieved)
+
+  -- counter : process (clk, reset, reset_cuenta, cuenta)
+  -- begin
+  --   if reset = '0' or reset_cuenta = '1' then
+  --     cuenta <= 0;
+  --   elsif rising_edge(clk) then
+  --     cuenta <= cuenta + 1;
+  --   end if;
+  -- end process;
+
+  state_machine : process (clk, reset)
+  begin
+    if reset = '0' then
+      PS <= Wait_state;
+    elsif rising_edge(clk) then
+      PS <= NS;
+    end if;
+  end process;
+
+  outputs : process (clk)
   begin
     if rising_edge(clk) then
-      case state is
-        when Init_state =>
-          if cnt_timer >= d then
-            state     <= Trigger_state;
-            rst_timer <= '1';
+      past_echo <= sync_echo;
+      sync_echo <= echo;
+    end if;
+  end process;
+
+  ultrasonic_sensor : process (clk, cuenta, past_echo, sync_echo, centimeters)
+  begin
+    if rising_edge(clk) then
+      case PS is
+        when Wait_state =>
+          if cuenta >= 500 then
+            trigger <= '0';
+            NS      <= Echo_state;
+            cuenta  <= 0;
           else
-            rst_timer <= '0';
+            trigger <= '1';
+            NS      <= Wait_state;
+            cuenta  <= cuenta + 1;
           end if;
-        when Trigger_state =>
-          if cnt_timer >= d then
-            state     <= Echo_state;
-            rst_timer <= '1';
-          else
-            rst_timer <= '0';
-          end if;
+
         when Echo_state =>
-          if echo_recieved = '1' or cnt_timer >= d then
-            state     <= Init_state;
-            rst_timer <= '1';
+          if past_echo = '0' and sync_echo = '1' then
+            cuenta      <= 0;
+            centimeters <= 0;
+          elsif past_echo = '1' and sync_echo = '0' then
+            distance_out <= centimeters;
+            cuenta       <= 0;
+          elsif cuenta >= 2900 then -- Aprox 1cm usando un reloj de 50[MHz]
+            if centimeters >= 3448 then
+              NS     <= Wait_state;
+              cuenta <= 0;
+            else
+              centimeters <= centimeters + 1;
+              cuenta      <= 0;
+            end if;
           else
-            state     <= Echo_state;
-            rst_timer <= '0';
+            NS     <= Echo_state;
+            cuenta <= cuenta + 1;
           end if;
-        when others =>
-          state <= Init_state;
+          trigger <= '0';
       end case;
     end if;
   end process;
-
-  timer : process (clk, en_timer, rst_timer)
-  begin
-    if rising_edge(clk) then
-      if en_timer = '1' and rst_timer = '0' then
-        cnt_timer <= cnt_timer + 1;
-      elsif rst_timer = '1' then
-        cnt_timer <= 0;
-      end if;
-    end if;
-  end process;
-
-  output : process (state, echo, echoing, cnt_timer)
-  begin
-    d       <= 0;
-    trigger <= '0';
-    case state is
-      when Init_state =>
-        en_timer      <= '1';
-        trigger       <= '0';
-        d             <= 50;
-        echoing       <= '0';
-        echo_recieved <= '0';
-      when Trigger_state =>
-        en_timer      <= '1';
-        d             <= 250;
-        echoing       <= '0';
-        echo_recieved <= '0';
-        trigger       <= '1';
-      when Echo_state =>
-        d <= 1_900_000_000;
-        if echo = '0' and echoing = '0' then
-          en_timer <= '1';
-        elsif echo = '1' then
-          en_timer <= '1';
-          echoing  <= '1';
-        elsif echo = '0' and echoing = '1' then
-          final_timer   <= cnt_timer;
-          en_timer      <= '0';
-          echoing       <= '0';
-          echo_recieved <= '1';
-        else
-          final_timer <= 0;
-          echo_recieved <= '0';
-          echoing <= '0';
-          en_timer <= '0';
-        end if;
-      when others =>
-        en_timer      <= '0';
-        trigger       <= '0';
-        d             <= 0;
-        echoing       <= '0';
-        echo_recieved <= '0';
-    end case;
-  end process;
-
-  -- VelSonido[cm]( Conteo[hz] * 1000[ms] / 50_000_000[hz]) / 2 -> distancia en cm
-  distance <= (34 * (final_timer * 1_000 / 25_000_000)) / 2;
+  distance <= distance_out;
 end architecture;

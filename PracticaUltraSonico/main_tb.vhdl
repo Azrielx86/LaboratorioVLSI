@@ -33,6 +33,7 @@ architecture tb_arch of main_tb is
   signal trigger : std_logic;
   signal led_out : std_logic_vector(7 downto 0);
 begin
+  reset <= '1';
   -- Clock process
   process
   begin
