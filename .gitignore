@@ -70,3 +70,6 @@ output_files/
 PLLJ_PLLSPE_INFO.txt
 
 *_assignment_defaults.qdf
+
+# Other extras
+*/__pycache__/
