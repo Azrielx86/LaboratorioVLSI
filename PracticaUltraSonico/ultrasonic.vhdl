@@ -75,17 +75,17 @@ begin
       when Init_state =>
         en_timer      <= '1';
         trigger       <= '0';
-        d             <= 10;
+        d             <= 50;
         echoing       <= '0';
         echo_recieved <= '0';
       when Trigger_state =>
         en_timer      <= '1';
-        d             <= 500;
+        d             <= 250;
         echoing       <= '0';
         echo_recieved <= '0';
         trigger       <= '1';
       when Echo_state =>
-        d <= 1_900_000;
+        d <= 1_900_000_000;
         if echo = '0' and echoing = '0' then
           en_timer <= '1';
         elsif echo = '1' then
@@ -96,9 +96,18 @@ begin
           en_timer      <= '0';
           echoing       <= '0';
           echo_recieved <= '1';
+        else
+          final_timer <= 0;
+          echo_recieved <= '0';
+          echoing <= '0';
+          en_timer <= '0';
         end if;
       when others =>
-
+        en_timer      <= '0';
+        trigger       <= '0';
+        d             <= 0;
+        echoing       <= '0';
+        echo_recieved <= '0';
     end case;
   end process;
 

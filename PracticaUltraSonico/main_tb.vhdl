@@ -36,7 +36,7 @@ begin
   -- Clock process
   process
   begin
-    while now < 100 ms loop
+    while now < 500 ms loop
       clk <= '0';
       wait for 20 ns;
       clk <= '1';
