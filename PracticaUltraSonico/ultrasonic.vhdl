@@ -2,7 +2,6 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
--- https://stackoverflow.com/questions/32599947/cant-run-hc-sr04-sensor-vhdl
 entity ultrasonic is
   port (
     clk      : in std_logic;
@@ -15,22 +14,12 @@ end entity ultrasonic;
 
 architecture archultrasonic of ultrasonic is
   type state_type is (Wait_state, Echo_state);
-  signal NS, PS : state_type := Wait_state;
-  signal cuenta : integer    := 0;
-  -- signal reset_cuenta         : std_logic  := '0';
-  signal centimeters          : integer   := 0;
-  signal distance_out         : integer   := 0;
-  signal past_echo, sync_echo : std_logic := '0';
+  signal NS, PS               : state_type := Wait_state;
+  signal cuenta               : integer    := 0;
+  signal centimeters          : integer    := 0;
+  signal distance_out         : integer    := 0;
+  signal past_echo, sync_echo : std_logic  := '0';
 begin
-
-  -- counter : process (clk, reset, reset_cuenta, cuenta)
-  -- begin
-  --   if reset = '0' or reset_cuenta = '1' then
-  --     cuenta <= 0;
-  --   elsif rising_edge(clk) then
-  --     cuenta <= cuenta + 1;
-  --   end if;
-  -- end process;
 
   state_machine : process (clk, reset)
   begin
