@@ -10,12 +10,12 @@ end entity;
 
 architecture arqpwm of pwm is
   type state is (STP, LEFT, RIGHT);
-  signal PS, NS : state;
-  signal clkl : std_logic;
+  signal PS, NS  : state;
+  signal clkl    : std_logic;
   signal pwm_out : std_logic;
 begin
-  epwm : entity work.senal (arqsenal) port map(clkl, 2500, pwm_out);
-  dvfff    : entity work.divf(arqdivf) port map(clk, clkl);
+  epwm  : entity work.senal (arqsenal) port map(clkl, 500, pwm_out);
+  dvfff : entity work.divf(arqdivf) generic map (2500) port map(clk, clkl);
 
   process (rst, clkl)
   begin
@@ -38,8 +38,8 @@ begin
           NS <= STP;
         end if;
 
-        pwm  <= '0';
-        npwm <= '0';
+        pwm        <= '0';
+        npwm       <= '0';
         enable_out <= '0';
 
       when LEFT =>
@@ -51,8 +51,8 @@ begin
           NS <= LEFT;
         end if;
 
-        pwm  <= '0';
-        npwm <= pwm_out;
+        pwm        <= '0';
+        npwm       <= pwm_out;
         enable_out <= '1';
 
       when RIGHT =>
@@ -64,15 +64,15 @@ begin
           NS <= RIGHT;
         end if;
 
-        pwm  <= pwm_out;
-        npwm <= '0';
+        pwm        <= pwm_out;
+        npwm       <= '0';
         enable_out <= '1';
 
       when others =>
-        pwm  <= '0';
-        npwm <= '0';
+        pwm        <= '0';
+        npwm       <= '0';
         enable_out <= '0';
-        NS <= STP;
+        NS         <= STP;
     end case;
   end process;
 end architecture;
