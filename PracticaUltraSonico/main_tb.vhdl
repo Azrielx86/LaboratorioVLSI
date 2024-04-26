@@ -52,12 +52,12 @@ begin
     echo <= '0';
     wait for 1 ms;
     echo <= '1';
-    wait for 2 ms;
+    wait for 15 ms;
 
     echo <= '0';
-    wait for 20 ms;
+    wait for 120 ms;
     echo <= '1';
-    wait for 2 ms;
+    wait for 5 ms;
 
     echo <= '0';
 
