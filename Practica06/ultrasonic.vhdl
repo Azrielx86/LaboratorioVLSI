@@ -2,25 +2,28 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
+--! Entidad para controlar el sensor HC-SR04 utilizando la FPGA DE10 Lite
 entity ultrasonic is
   port (
-    clk      : in std_logic;
-    reset    : in std_logic;
-    echo     : in std_logic;
-    trigger  : out std_logic;
-    distance : out integer := 0
+    clk      : in std_logic; --! Entrada del reloj a 50[MHz]
+    reset    : in std_logic; --! Entrada del reset
+    echo     : in std_logic; --! Entrada del sensor echo
+    trigger  : out std_logic; --! Salida del trigger
+    distance : out integer := 0 --! Distancia en [cm]
   );
 end entity ultrasonic;
 
 architecture archultrasonic of ultrasonic is
-  type state_type is (Wait_state, Echo_state);
-  signal NS, PS               : state_type := Wait_state;
-  signal cuenta               : integer    := 0;
-  signal centimeters          : integer    := 0;
-  signal distance_out         : integer    := 0;
-  signal past_echo, sync_echo : std_logic  := '0';
+  type state_type is (Wait_state, Echo_state); --! Estados del sensor
+  signal PS                   : state_type := Wait_state; --! Estado actual de la FSM
+  signal NS                   : state_type := Wait_state; --! Siguiente estado en la FSM
+  signal cuenta               : integer    := 0; --! Contador de flancos de subida
+  signal centimeters          : integer    := 0; --! Conteo de centímetros
+  signal distance_out         : integer    := 0; --! Señal de salida para la distancia
+  signal past_echo, sync_echo : std_logic  := '0'; --! Auxiliar para el sensor echo
 begin
-
+  --! Proceso para realizar el cambio del estado de la FSM en cada flanco de subida
+  --! y su reinicio.
   state_machine : process (clk, reset)
   begin
     if reset = '0' then
@@ -30,7 +33,8 @@ begin
     end if;
   end process;
 
-  outputs : process (clk)
+  --! Control de las entradas del echo
+  echo_inputs : process (clk)
   begin
     if rising_edge(clk) then
       past_echo <= sync_echo;
@@ -38,6 +42,7 @@ begin
     end if;
   end process;
 
+  --! Lógica de la máquina de estados del sensor
   ultrasonic_sensor : process (clk, cuenta, past_echo, sync_echo, centimeters)
   begin
     if rising_edge(clk) then
