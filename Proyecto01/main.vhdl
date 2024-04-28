@@ -10,8 +10,8 @@ entity main is
     echo    : in std_logic;
     trigger : out std_logic;
     -- Parte motor
-    enable_in             : in std_logic;
-    pwm, npwm, enable_out : out std_logic;
+    enable_in       : in std_logic;
+    pwm, enable_out : out std_logic;
     -- Displays
     display1 : out std_logic_vector(6 downto 0);
     display2 : out std_logic_vector(6 downto 0);
@@ -22,22 +22,26 @@ end entity main;
 architecture arqmain of main is
   -- Auxiliares motor
   signal clk_motor : std_logic := '0';
+  signal pwm_var   : integer   := 0;
   signal pwm_out   : std_logic := '0';
   -- Auxiliares sensor
-  signal distance   : integer := 0;
-  signal bin_digits : std_logic_vector(27 downto 0);
+  signal distance     : integer := 0;
+  signal neg_distance : integer := 0;
+  signal bin_digits   : std_logic_vector(27 downto 0);
   -- Constantes
   constant max_clk_motor : integer := 2500;
   constant max_speed     : integer := max_clk_motor; --! Velocidad máxima = Pulso completo
   constant min_speed     : integer := 300; --! Mínimo para que el motor tenga suficiente potencia para girar.
-
+  constant max_distance  : integer := 200; --! Máxima distancia: 200[cm], por lo tanto v_max se alcanza a los 100[cm]
+  constant mid_distance  : integer := max_distance / 2;
+  constant increment     : integer := 20;
   -- Máquina de estados robot
-  type state is (STOP, ACCELERATE, DECELERATE);
-  signal PS, NS : state := STOP;
+  type state is (STATE_STOP, STATE_ACCELERATE, STATE_MID, STATE_DECELERATE);
+  signal PS, NS : state := STATE_STOP;
 begin
   -- Parte del motor
   div_freq_motor : entity work.divf(arqdivf) generic map (max_clk_motor) port map(clk, clk_motor);
-  pwm_motor      : entity work.senal (arqsenal) port map(clk_motor, 500, pwm_out);
+  pwm_motor      : entity work.senal (arqsenal) port map(clk_motor, pwm_var, pwm_out);
   pwm        <= pwm_out;
   enable_out <= enable_in;
   -- Parte para el sensor
@@ -47,19 +51,50 @@ begin
   digit2    : entity work.display port map(bin_digits(7 downto 4), display2);
   digit3    : entity work.display port map(bin_digits(11 downto 8), display3);
 
-  fsm_change : process (clk, reset)
+  -- Procesos
+  fsm_change : process (clk, reset, NS)
   begin
     if reset = '0' then
-      PS <= STOP;
-    else
+      PS <= STATE_STOP;
+    elsif rising_edge(clk) then
       PS <= NS;
     end if;
   end process;
 
-  fsm_robot : process (clk)
+  fsm_robot : process (clk, distance, enable_in)
   begin
-    case PS is
-      when STOP =>
-    end case;
+    if rising_edge(clk) then
+      neg_distance <= - distance;
+      case PS is
+        when STATE_STOP =>
+          if enable_in = '1' and distance < max_distance then
+            NS <= STATE_ACCELERATE;
+          else
+            NS <= STATE_STOP;
+          end if;
+          pwm_var <= 0;
+        when STATE_ACCELERATE =>
+          if neg_distance >= mid_distance - 1 then
+            NS <= STATE_MID;
+          else
+            NS <= STATE_ACCELERATE;
+          end if;
+          pwm_var <= (distance * max_speed) / mid_distance;
+        when STATE_MID =>
+          if neg_distance >= mid_distance + 1 then
+            NS <= STATE_DECELERATE;
+          else
+            NS <= STATE_MID;
+          end if;
+          pwm_var <= max_speed;
+        when STATE_DECELERATE =>
+          if distance >= max_distance then
+            NS <= STATE_STOP;
+          else
+            NS <= STATE_DECELERATE;
+          end if;
+          pwm_var <= ((max_distance - distance) * max_speed) / mid_distance;
+      end case;
+    end if;
   end process;
 end architecture;
