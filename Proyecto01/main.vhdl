@@ -27,9 +27,8 @@ architecture arqmain of main is
   signal pwm_var   : integer   := 0;
   signal pwm_out   : std_logic := '0';
   -- Auxiliares sensor
-  signal distance     : integer := 0;
-  signal neg_distance : integer := 0;
-  signal bin_digits   : std_logic_vector(27 downto 0);
+  signal distance   : integer := 0;
+  signal bin_digits : std_logic_vector(27 downto 0);
   -- Constantes
   constant max_clk_motor : integer := 1500;
   constant max_speed     : integer := max_clk_motor; --! Velocidad máxima = Pulso completo
@@ -66,39 +65,38 @@ begin
   fsm_robot : process (clk, distance, enable_in)
   begin
     if rising_edge(clk) then
-      neg_distance <= - distance;
       case PS is
         when STATE_STOP =>
-          if enable_in = '1' and distance < max_distance then
+          if enable_in = '1' and distance > 5 then
             NS <= STATE_ACCELERATE;
           else
             NS <= STATE_STOP;
           end if;
-          pwm_var <= 0;
+          pwm_var    <= 0;
           curr_state <= "0001";
-        when STATE_ACCELERATE =>
-          if distance >= mid_distance - 1 then
+        when STATE_ACCELERATE => -- 200 cm 105
+          if max_distance - distance >= mid_distance - 5 then
             NS <= STATE_MID;
           else
             NS <= STATE_ACCELERATE;
           end if;
-          pwm_var <= (distance * max_speed) / mid_distance;
+          pwm_var    <= ((max_distance - distance) * max_speed) / mid_distance;
           curr_state <= "0010";
-        when STATE_MID =>
-          if distance >= mid_distance + 1 then
+        when STATE_MID => -- 105 a 95
+          if max_distance - distance >= mid_distance + 5 then
             NS <= STATE_DECELERATE;
           else
             NS <= STATE_MID;
           end if;
-          pwm_var <= max_speed;
+          pwm_var    <= max_speed;
           curr_state <= "0100";
-        when STATE_DECELERATE =>
-          if distance >= max_distance then
+        when STATE_DECELERATE => -- 95 a 5
+          if distance <= 5 then -- Menor a 5[cm]
             NS <= STATE_STOP;
           else
             NS <= STATE_DECELERATE;
           end if;
-          pwm_var <= ((max_distance - distance) * max_speed) / mid_distance;
+          pwm_var    <= (distance * max_speed) / mid_distance;
           curr_state <= "1000";
       end case;
     end if;
