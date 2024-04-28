@@ -15,7 +15,9 @@ entity main is
     -- Displays
     display1 : out std_logic_vector(6 downto 0);
     display2 : out std_logic_vector(6 downto 0);
-    display3 : out std_logic_vector(6 downto 0)
+    display3 : out std_logic_vector(6 downto 0);
+    -- Visulización del estado actual
+    curr_state : out std_logic_vector(3 downto 0)
   );
 end entity main;
 
@@ -29,7 +31,7 @@ architecture arqmain of main is
   signal neg_distance : integer := 0;
   signal bin_digits   : std_logic_vector(27 downto 0);
   -- Constantes
-  constant max_clk_motor : integer := 2500;
+  constant max_clk_motor : integer := 1500;
   constant max_speed     : integer := max_clk_motor; --! Velocidad máxima = Pulso completo
   constant min_speed     : integer := 300; --! Mínimo para que el motor tenga suficiente potencia para girar.
   constant max_distance  : integer := 200; --! Máxima distancia: 200[cm], por lo tanto v_max se alcanza a los 100[cm]
@@ -73,20 +75,23 @@ begin
             NS <= STATE_STOP;
           end if;
           pwm_var <= 0;
+          curr_state <= "0001";
         when STATE_ACCELERATE =>
-          if neg_distance >= mid_distance - 1 then
+          if distance >= mid_distance - 1 then
             NS <= STATE_MID;
           else
             NS <= STATE_ACCELERATE;
           end if;
           pwm_var <= (distance * max_speed) / mid_distance;
+          curr_state <= "0010";
         when STATE_MID =>
-          if neg_distance >= mid_distance + 1 then
+          if distance >= mid_distance + 1 then
             NS <= STATE_DECELERATE;
           else
             NS <= STATE_MID;
           end if;
           pwm_var <= max_speed;
+          curr_state <= "0100";
         when STATE_DECELERATE =>
           if distance >= max_distance then
             NS <= STATE_STOP;
@@ -94,6 +99,7 @@ begin
             NS <= STATE_DECELERATE;
           end if;
           pwm_var <= ((max_distance - distance) * max_speed) / mid_distance;
+          curr_state <= "1000";
       end case;
     end if;
   end process;
