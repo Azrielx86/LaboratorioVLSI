@@ -29,4 +29,4 @@ if __name__ == "__main__":
     # print(digits)
     for i in range(1, 134):
         digits = int_to_digits(i)
-        print(f"{i} -> {digits}-{[*map(lambda x: bin(x),digits)]}")
+        print(f"{i} -> {digits}-{[*map(lambda x: bin(x)[2:].zfill(4),digits)]}")

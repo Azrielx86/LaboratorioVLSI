@@ -4,16 +4,16 @@ use ieee.numeric_std.all;
 
 entity main is
   port (
-    clk   : in std_logic;
-    reset : in std_logic;
+    clk   : in std_logic; --! Reloj de la tarjeta
+    reset : in std_logic; --! Entrada del reset
     -- Parte sensor
-    echo    : in std_logic;
-    trigger : out std_logic;
+    echo    : in std_logic; --! Entrada del echo del sensor
+    trigger : out std_logic; --! Salida del trigger del sensor
     -- Displays
-    display1 : out std_logic_vector(6 downto 0);
-    display2 : out std_logic_vector(6 downto 0);
-    display3 : out std_logic_vector(6 downto 0);
-    led_out  : out std_logic_vector(7 downto 0)
+    display1 : out std_logic_vector(6 downto 0); --! Decenas
+    display2 : out std_logic_vector(6 downto 0); --! Centenas
+    display3 : out std_logic_vector(6 downto 0); --! Unidades
+    led_out  : out std_logic_vector(7 downto 0) --! Salida en binario
   );
 end entity main;
 

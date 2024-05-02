@@ -74,3 +74,4 @@ PLLJ_PLLSPE_INFO.txt
 # Other extras
 */__pycache__/
 .venv/
+*.png
