@@ -70,6 +70,8 @@ begin
           when IDLE                  =>
             register_dataRx <= (others => '0');
             next_status     <= START_BIT;
+            bit_counter := 0;
+            ticks_count := 0;
           when START_BIT =>
             if rx_d = '0' then
               next_status <= WAIT_CICLES_FRONT;
