@@ -17,7 +17,6 @@ architecture arqpwm of pwm is
   signal clkl    : std_logic; --! Reloj más lento
   signal pwm_out : std_logic; --! Salioa del pwm
 begin
-  --! Divisor de frecuencias a 2500[Hz]
   dvfff : entity work.divf(arqdivf) generic map (2500) port map(clk, clkl);
   --! Entidad para el control del pwm, corresponde a 1/5 del ciclo de dvfff
   epwm : entity work.senal(arqsenal) port map(clkl, 500, pwm_out);
